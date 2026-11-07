@@ -90,3 +90,39 @@ Los criterios diferencian la revisión documental que puede realizarse durante e
 ### Video de sustentación de la Actividad 2
 
 **Estado:** pendiente de agregar un enlace confirmado.
+
+## Actividad 3: Diseño y dominio
+
+La Actividad 3 modela el flujo **asignar un repartidor a una entrega existente** mediante `AssignCourierUseCase`. La propuesta conserva el monolito modular de ADR-001, ubica las invariantes en la entidad `Delivery` y separa Dominio, Aplicación e Infraestructura mediante puertos y adaptadores.
+
+No se implementan todavía la persistencia ni una integración externa real. Los permisos, estados, reglas de disponibilidad y capacidad se mantienen como propuestas pendientes de validación.
+
+### Vista resumida del flujo
+
+```mermaid
+flowchart LR
+    O[Operador logístico] --> U[AssignCourierUseCase]
+    U --> A[Autorización]
+    U --> D[Delivery]
+    U --> R[IDeliveryRepository]
+    U --> C[ICourierAvailability]
+    D --> E[CourierAssigned]
+    R -. implementado por .-> RI[Adaptador de persistencia]
+    C -. implementado por .-> CI[Adaptador de disponibilidad]
+```
+
+El caso de uso coordina la operación; `Delivery` protege que la entrega no tenga más de un repartidor activo; y la infraestructura implementa los puertos sin introducir sus detalles en el dominio.
+
+1. [Flujo y lenguaje ubicuo](docs/actividad-3/01-flujo-y-lenguaje-ubicuo.md)
+2. [Modelo de dominio](docs/actividad-3/02-modelo-de-dominio.md)
+3. [Escenarios de aceptación](docs/actividad-3/03-escenarios-de-aceptacion.md)
+4. [Contextos, capas, puertos y adaptadores](docs/actividad-3/04-contextos-puertos-y-adaptadores.md)
+5. [Casos de uso y contratos](docs/actividad-3/05-casos-de-uso-y-contratos.md)
+6. [Diagramas C4](docs/actividad-3/06-diagrama-c4.md)
+7. [Trazabilidad y checklist](docs/actividad-3/07-trazabilidad-y-checklist.md)
+8. [ADR-002](docs/actividad-3/adr/ADR-002-modelo-asignacion-repartidor.md)
+9. [Architecture.md](Architecture.md)
+
+### Video de sustentación de la Actividad 3
+
+**Estado:** pendiente de agregar un enlace confirmado.
