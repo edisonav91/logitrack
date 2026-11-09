@@ -2,7 +2,7 @@
 
 ## Estado de la propuesta
 
-LogiTrack se diseña como un **monolito modular** según [ADR-001](docs/actividad-2/05-adr-001-decision-estructural.md). La Actividad 3 detalla el flujo de asignación de un repartidor sin elegir todavía lenguaje, framework, base de datos, mensajería ni proveedor externo.
+LogiTrack se implementa como un **monolito modular** según [ADR-001](docs/actividad-2/05-adr-001-decision-estructural.md). La Actividad 3 diseñó el flujo de asignación y la Actividad 4 lo materializó como un vertical slice en .NET 9 con persistencia SQLite.
 
 ## Capas y dirección de dependencias
 
@@ -51,5 +51,61 @@ La colaboración ocurre mediante contratos. Se prohíben escrituras directas en 
 
 ## Restricciones y pendientes
 
-Los estados, responsables, permisos, fuente de disponibilidad, capacidad de ruta, reasignación y contratos externos deben validarse. La Actividad 4 deberá implementar una rebanada vertical y aportar evidencia de pruebas; estos documentos no demuestran ejecución.
+Los estados, responsables, permisos, fuente real de disponibilidad, capacidad de ruta, reasignación y contratos externos deben validarse. La implementación actual es una rebanada académica y no se presenta como despliegue productivo.
+
+## Implementación de la Actividad 4
+
+```mermaid
+flowchart LR
+    subgraph API[LogiTrack.Api]
+      E[Endpoint assign-courier]
+    end
+    subgraph Application[LogiTrack.Application]
+      UC[AssignCourierUseCase]
+      P[Puertos]
+    end
+    subgraph Domain[LogiTrack.Domain]
+      D[Delivery]
+      EV[CourierAssigned]
+    end
+    subgraph Infrastructure[LogiTrack.Infrastructure]
+      R[SqliteDeliveryRepository]
+      A[ConfiguredCourierAvailability]
+      O[SqliteOutboxPublisher]
+    end
+    E --> UC
+    UC --> D
+    D --> EV
+    UC --> P
+    R --> P
+    A --> P
+    O --> P
+    R --> S[(SQLite)]
+    O --> S
+```
+
+### Decisiones de implementación
+
+- SQLite con migración SQL versionada y ejecutor propio.
+- Concurrencia optimista mediante versión esperada.
+- Outbox transaccional para no perder `CourierAssigned`.
+- API key obtenida por configuración y autorización por rol como límite académico.
+- Logs estructurados, correlación, `Meter` y `ActivitySource`.
+- Pruebas separadas de dominio, aplicación, integración y arquitectura.
+
+### Evidencia automatizada
+
+- 5 pruebas de dominio;
+- 7 pruebas de aplicación;
+- 7 pruebas de integración;
+- 2 pruebas arquitectónicas;
+- compilación con advertencias tratadas como errores;
+- formato y CI verificables.
+
+### Documentos relacionados
+
+- [Alcance y trazabilidad](docs/actividad-4/01-alcance-y-trazabilidad.md)
+- [Pruebas y evidencia](docs/actividad-4/04-pruebas-y-evidencia.md)
+- [Riesgos y observabilidad](docs/actividad-4/05-riesgos-seguridad-y-observabilidad.md)
+- [ADR-003](docs/actividad-4/adr/ADR-003-decisiones-de-implementacion.md)
 

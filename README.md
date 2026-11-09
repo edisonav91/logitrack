@@ -10,7 +10,7 @@ Los usuarios principales contemplados son el personal encargado de la operación
 
 El objetivo general de LogiTrack es ofrecer una plataforma centralizada que permita registrar pedidos, validar inventario, asignar rutas, rastrear entregas y gestionar incidencias. Esta formulación representa el alcance funcional inicial del producto y no constituye una selección de arquitectura técnica ni de tecnologías.
 
-El proyecto se ha documentado de manera progresiva. La Actividad 1 desarrolló el diagnóstico y el contexto arquitectónico. La Actividad 2 definió los requisitos, los escenarios de calidad, la comparación de alternativas y una decisión estructural inicial. Todavía no se han seleccionado tecnologías ni se ha implementado la plataforma.
+El proyecto se ha documentado de manera progresiva. La Actividad 1 desarrolló el diagnóstico y el contexto arquitectónico; la Actividad 2 definió requisitos y la decisión estructural; la Actividad 3 diseñó el dominio; y la Actividad 4 implementó y validó el vertical slice de asignación de repartidor con .NET 9 y SQLite.
 
 ## Actividad 1: Diagnóstico y contexto arquitectónico
 
@@ -124,5 +124,56 @@ El caso de uso coordina la operación; `Delivery` protege que la entrega no teng
 9. [Architecture.md](Architecture.md)
 
 ### Video de sustentación de la Actividad 3
+
+**Estado:** pendiente de agregar un enlace confirmado.
+
+## Actividad 4: Construcción, validación y defensa final
+
+La Actividad 4 implementa `AssignCourierUseCase` como un vertical slice ejecutable. La entrada HTTP conecta Aplicación, el agregado `Delivery`, SQLite, disponibilidad configurable y publicación mediante outbox sin invertir las dependencias definidas en la Actividad 3.
+
+```mermaid
+flowchart LR
+    HTTP[API HTTP] --> APP[AssignCourierUseCase]
+    APP --> DOM[Delivery]
+    APP --> PORTS[Puertos de aplicación]
+    INFRA[Adaptadores de infraestructura] --> PORTS
+    INFRA --> DB[(SQLite)]
+    DOM --> EVENT[CourierAssigned]
+    EVENT --> DB
+```
+
+### Ejecución rápida
+
+Requisitos: .NET SDK 9.0.200.
+
+```powershell
+dotnet restore LogiTrack.sln
+$env:Security__ApiKey = "una-clave-local-no-compartida"
+dotnet run --project src/LogiTrack.Api/LogiTrack.Api.csproj --urls http://127.0.0.1:5055
+```
+
+La migración se aplica automáticamente. En Development se crea la entrega demo `11111111-1111-1111-1111-111111111111`. Las solicitudes de ejemplo están en `src/LogiTrack.Api/LogiTrack.Api.http`.
+
+### Verificación
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
+```
+
+La verificación ejecuta compilación, 21 pruebas automatizadas y control de formato. Las pruebas cubren dominio, aplicación, integración HTTP–SQLite y dependencias arquitectónicas.
+
+### Documentación
+
+1. [Alcance y trazabilidad](docs/actividad-4/01-alcance-y-trazabilidad.md)
+2. [Implementación y ejecución](docs/actividad-4/02-implementacion-y-ejecucion.md)
+3. [Persistencia e integraciones](docs/actividad-4/03-persistencia-e-integraciones.md)
+4. [Pruebas y evidencia](docs/actividad-4/04-pruebas-y-evidencia.md)
+5. [Riesgos, seguridad y observabilidad](docs/actividad-4/05-riesgos-seguridad-y-observabilidad.md)
+6. [Resultados y próximos pasos](docs/actividad-4/06-resultados-y-proximos-pasos.md)
+7. [Checklist final](docs/actividad-4/07-checklist-final.md)
+8. [ADR-003](docs/actividad-4/adr/ADR-003-decisiones-de-implementacion.md)
+9. [Arquitectura consolidada](Architecture.md)
+
+### Video de demostración y defensa final
 
 **Estado:** pendiente de agregar un enlace confirmado.
