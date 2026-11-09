@@ -1,0 +1,41 @@
+name: LogiTrack CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore LogiTrack.sln
+
+      - name: Build
+        run: dotnet build LogiTrack.sln --no-restore
+
+      - name: Test domain
+        run: dotnet test tests/LogiTrack.Domain.Tests/LogiTrack.Domain.Tests.csproj --no-build --no-restore
+
+      - name: Test application
+        run: dotnet test tests/LogiTrack.Application.Tests/LogiTrack.Application.Tests.csproj --no-build --no-restore
+
+      - name: Test integration
+        run: dotnet test tests/LogiTrack.IntegrationTests/LogiTrack.IntegrationTests.csproj --no-build --no-restore
+
+      - name: Test architecture
+        run: dotnet test tests/LogiTrack.ArchitectureTests/LogiTrack.ArchitectureTests.csproj --no-build --no-restore
+
+      - name: Verify formatting
+        run: dotnet format LogiTrack.sln --verify-no-changes --no-restore
+
